@@ -1,42 +1,57 @@
-import { camera } from "./display.js"
-import { key } from "./input.js"
+camera.rotation.order = "YXZ"
 
 const player = {
-  x = 0,
-  y = 0,
-  z = -5,
-  rotX = 0,
-  rotY = 0,
-  powX = 0,
-  powY = 0,
-  powZ = 0,
-  speed = 0.1,
-  friction = 0.9,
-  sensitive = 0.03
+  x: 0,
+  y: 0,
+  z: -5,
+
+  yaw: 0,    // 左右
+  pitch: 0,  // 上下
+
+  powX: 0,
+  powY: 0,
+  powZ: 0,
+
+  speed: 0.1,
+  friction: 0.9,
+  sensitive: 0.03
 }
 
-const yLimit = Math.PI()/2
+const pitchLimit = Math.PI / 2 - 0.01
 
-function main() {
+export function main() {
+
+  // ===== 移動入力 =====
   if (key["KeyW"]) player.powZ += player.speed;
   if (key["KeyS"]) player.powZ -= player.speed;
   if (key["KeyD"]) player.powX += player.speed;
   if (key["KeyA"]) player.powX -= player.speed;
   if (key["KeyE"]) player.powY += player.speed;
   if (key["KeyQ"]) player.powY -= player.speed;
+
+  // 摩擦
   player.powX *= player.friction;
   player.powY *= player.friction;
   player.powZ *= player.friction;
-  player.x += player.powX;
+
+  // ===== 回転入力 =====
+  if (key["ArrowLeft"])  player.yaw += player.sensitive;
+  if (key["ArrowRight"]) player.yaw -= player.sensitive;
+  if (key["ArrowUp"])    player.pitch += player.sensitive;
+  if (key["ArrowDown"])  player.pitch -= player.sensitive;
+
+  // ピッチ制限
+  player.pitch = Math.max(-pitchLimit, Math.min(pitchLimit, player.pitch));
+
+  // ===== ワールド移動計算 =====
+  player.x += player.powZ * Math.sin(player.yaw) + player.powX * Math.cos(player.yaw);
+
+  player.z += player.powZ * Math.cos(player.yaw) - player.powX * Math.sin(player.yaw);
+
   player.y += player.powY;
-  player.z += player.powZ;
 
-  if (key["ArrowUp"]) player.rotY += player.sensitive;
-  if (key["ArrowDown"]) player.rotY -= player.sensitive;
-  if (key["ArrowRight"]) player.rotX += player.sensitive;
-  if (key["ArrowLeft"]) player.rotX -= player.sensitive;
-  if (player.rotY > yLimit) player.rotY = yLimit;
-  if (player.rotY < -yLimit) player.rotY = -yLimit;
-
-  camera.position
+  // ===== カメラ反映 =====
+  camera.position.set(player.x, player.y, player.z);
+  camera.rotation.y = player.yaw;
+  camera.rotation.x = player.pitch;
 }
