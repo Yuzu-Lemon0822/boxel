@@ -9,6 +9,11 @@
 // 3D空間そのもの
 export const scene = new THREE.Scene();
 
+const light = new THREE.DirectionalLight(0xffffff, 1);
+light.position.set(5, 5, 5);
+scene.add(light);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 
 // ===== カメラ作成 =====
 // PerspectiveCamera(視野角, アスペクト比, near, far)
