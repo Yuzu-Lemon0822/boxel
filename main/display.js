@@ -154,7 +154,7 @@ const cube = box(
   [1, 1, 1],
   {
     color: 0x00ff00,
-    frontFace: false
+    backFace: false
   }
 );
 
