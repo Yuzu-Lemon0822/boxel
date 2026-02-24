@@ -31,21 +31,134 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 // HTMLにcanvasを追加
 document.body.appendChild(renderer.domElement);
 
+function box(pos, size, opts = {}) {
 
-// ===== 立方体作成 =====
+  const {
+    color = 0xffffff,
+    material = null,
 
-// 形状（幅・高さ・奥行）
-const geometry = new THREE.BoxGeometry(1, 1, 1);
+    rightFace = true,
+    leftFace = true,
+    topFace = true,
+    bottomFace = true,
+    frontFace = true,
+    backFace = true
+  } = opts;
 
-// 法線方向で色が変わるマテリアル（立体感確認用）
-const material = new THREE.MeshNormalMaterial();
+  const geometry = new THREE.BufferGeometry();
 
-// geometry + material を合体させた描画オブジェクト
-const cube = new THREE.Mesh(geometry, material);
+  const vertices = [];
+  const normals = [];
+  const indices = [];
 
-// シーンに追加（これしないと表示されない）
+  let indexOffset = 0;
+
+  const addFace = (v, normal) => {
+
+    vertices.push(...v);
+
+    for (let i = 0; i < 4; i++) {
+      normals.push(...normal);
+    }
+
+    indices.push(
+      indexOffset, indexOffset+1, indexOffset+2,
+      indexOffset, indexOffset+2, indexOffset+3
+    );
+
+    indexOffset += 4;
+  };
+
+  const [x, y, z] = pos;
+  const [sx, sy, sz] = size;
+
+  const x0 = x,       x1 = x + sx;
+  const y0 = y,       y1 = y + sy;
+  const z0 = z,       z1 = z + sz;
+
+  // 外側から見てCCW
+
+  if (frontFace) {
+    addFace([
+      x0,y0,z1,
+      x1,y0,z1,
+      x1,y1,z1,
+      x0,y1,z1
+    ], [0,0,1]);
+  }
+
+  if (backFace) {
+    addFace([
+      x1,y0,z0,
+      x0,y0,z0,
+      x0,y1,z0,
+      x1,y1,z0
+    ], [0,0,-1]);
+  }
+
+  if (rightFace) {
+    addFace([
+      x1,y0,z1,
+      x1,y0,z0,
+      x1,y1,z0,
+      x1,y1,z1
+    ], [1,0,0]);
+  }
+
+  if (leftFace) {
+    addFace([
+      x0,y0,z0,
+      x0,y0,z1,
+      x0,y1,z1,
+      x0,y1,z0
+    ], [-1,0,0]);
+  }
+
+  if (topFace) {
+    addFace([
+      x0,y1,z1,
+      x1,y1,z1,
+      x1,y1,z0,
+      x0,y1,z0
+    ], [0,1,0]);
+  }
+
+  if (bottomFace) {
+    addFace([
+      x0,y0,z0,
+      x1,y0,z0,
+      x1,y0,z1,
+      x0,y0,z1
+    ], [0,-1,0]);
+  }
+
+  geometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(new Float32Array(vertices), 3)
+  );
+
+  geometry.setAttribute(
+    "normal",
+    new THREE.BufferAttribute(new Float32Array(normals), 3)
+  );
+
+  geometry.setIndex(indices);
+
+  const mat = material ?? new THREE.MeshStandardMaterial({ color });
+
+  return new THREE.Mesh(geometry, mat);
+}
+
+const cube = box(
+  [0, 0, 0],
+  [1, 1, 1],
+  {
+    color: 0x00ff00,
+    frontFace: false
+  }
+);
+
 scene.add(cube);
-
 
 // ===== 描画関数 =====
 // main.jsから毎フレーム呼ばれる想定
