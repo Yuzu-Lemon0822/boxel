@@ -6,7 +6,7 @@ camera.rotation.order = "YXZ"
 const player = {
   x: 0,
   y: 0,
-  z: -5,
+  z: 5,
 
   yaw: 0,    // 左右
   pitch: 0,  // 上下
@@ -15,9 +15,9 @@ const player = {
   powY: 0,
   powZ: 0,
 
-  speed: 0.1,
+  speed: 0.02,
   friction: 0.9,
-  sensitive: 0.03
+  sensitive: 0.05
 }
 
 const pitchLimit = Math.PI / 2 - 0.01
@@ -25,8 +25,8 @@ const pitchLimit = Math.PI / 2 - 0.01
 export function main() {
 
   // ===== 移動入力 =====
-  if (key["KeyW"]) player.powZ += player.speed;
-  if (key["KeyS"]) player.powZ -= player.speed;
+  if (key["KeyW"]) player.powZ -= player.speed;
+  if (key["KeyS"]) player.powZ += player.speed;
   if (key["KeyD"]) player.powX += player.speed;
   if (key["KeyA"]) player.powX -= player.speed;
   if (key["KeyE"]) player.powY += player.speed;
